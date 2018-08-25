@@ -40,22 +40,29 @@ endif
 #### example (rst build)
 
 ```vim
-if 1 == get(g:, 'enable_rstbuild', '0')
 
-  if has("win32") || has("win95") || has("win64") || has("win16")
-    let s:exd_rstbuild = 'make_html.bat'
-  else
-    let s:exd_rstbuild = 'make_html.sh'
-  endif
+let g:enable_rstbuild = 1
 
-  command! ExecmdRst call execmd#Execute(s:exd_rstbuild)
-
-  " auto make_html
-  augroup execmd_rst
-    autocmd!
-    autocmd BufWritePost *.rst call execmd#Execute(s:exd_rstbuild)
-  augroup END
-
+if has("win32") || has("win95") || has("win64") || has("win16")
+  let s:exd_rstbuild = 'make_html.bat'
+else
+  let s:exd_rstbuild = 'make_html.sh'
 endif
+
+" example rst manual execute
+command! ExecmdRst call execmd#Execute(s:exd_rstbuild)
+
+" example auto execute
+augroup augroup_execmd
+  autocmd!
+  autocmd BufWritePost * call s:ExecOnBufWritePost()
+augroup END
+function! s:ExecOnBufWritePost()
+  let l:filename = expand('%:t')
+  if '' != matchstr(l:filename, '^.*\.rst$')
+        \ && 1 == get(g:, 'enable_rstbuild', '0')
+      call execmd#Execute(s:exd_rstbuild)
+  endif
+endfunction
 ```
 
